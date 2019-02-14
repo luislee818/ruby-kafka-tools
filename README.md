@@ -1,8 +1,6 @@
-# Ruby::Kafka::Tools
+# KafkaTools
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/ruby/kafka/tools`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+A simple library for monitoring Kafka topics. Uses [`ruby-kafka`](https://github.com/zendesk/ruby-kafka) under the covers.
 
 ## Installation
 
@@ -22,7 +20,23 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+require 'ruby-kafka-tools'
+require 'json'
+
+BROKER = 'broker url'
+TOPIC = 'topic name'
+
+monitor = KafkaTools::TopicMonitor.new
+
+filter = -> (key, value) { JSON.parse(value)['prop'] == 'target' }
+
+monitor.subscribe(broker: BROKER, topic: TOPIC, filter: filter) do |message|
+  puts message.value
+end
+
+trap("TERM") { monitor.stop }
+```
 
 ## Development
 
