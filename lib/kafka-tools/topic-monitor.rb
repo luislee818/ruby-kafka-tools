@@ -2,16 +2,19 @@ require 'kafka'
 
 module KafkaTools
   class TopicMonitor
-    def subscribe(broker:, topic:, start_from_beginning: false, filter: method(:always_true))
-      @kafka = Kafka.new([broker])
+    def subscribe(broker:, topic:, start_from_beginning: false, filter: method(:always_true), consumer_group: 'ruby-kafka-tools')
+      kafka = Kafka.new([broker])
 
-      @kafka.each_message(topic: topic, start_from_beginning: start_from_beginning, min_bytes: 1, max_wait_time: 1) do |message|
+      @consumer = kafka.consumer(group_id: consumer_group)
+      @consumer.subscribe(topic, start_from_beginning: start_from_beginning)
+
+      @consumer.each_message do |message|
         yield message if filter.call(message.key, message.value)
       end
     end
 
     def stop
-      @kafka.close if @kafka
+      @consumer.stop if @consumer
     end
 
     private
